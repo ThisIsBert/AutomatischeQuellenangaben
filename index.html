@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Quellen-Bookmarklet installieren</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #111;
+    }
+    body {
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 24px 20px 40px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      line-height: 1.5;
+      margin: 0.3rem 0 0.8rem;
+    }
+    ol {
+      margin-top: 0.6rem;
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.3rem 0;
+    }
+    .bookmarklet-link {
+      display: inline-block;
+      margin: 14px 0;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: none;
+      background: #0050b3;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+    }
+    .bookmarklet-link:active {
+      cursor: grabbing;
+      transform: translateY(1px);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+    }
+    .hint {
+      font-size: 0.85rem;
+      color: #555;
+    }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      margin-top: 10px;
+      padding: 10px;
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      resize: vertical;
+      background: #fafafa;
+    }
+    button.copy-btn {
+      margin-top: 8px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #f3f3f3;
+      cursor: pointer;
+    }
+    button.copy-btn:hover {
+      background: #e6e6e6;
+    }
+    .footer {
+      margin-top: 18px;
+      font-size: 0.78rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quellen-Bookmarklet installieren</h1>
+  <p>
+    Dieses Bookmarklet erzeugt aus der aktuellen Seite eine kompakte Quellenangabe
+    und zeigt sie in einem kleinen Fenster an, von wo aus sie in die Zwischenablage
+    kopiert werden kann.
+  </p>
+
+  <h2>Installation</h2>
+  <ol>
+    <li>
+      Blendet in eurem Browser die Lesezeichen- / Favoritenleiste ein
+      (z.&nbsp;B. in vielen Browsern mit <strong>Strg+Shift+B</strong> bzw.
+      <strong>Cmd+Shift+B</strong>).
+    </li>
+    <li>
+      Zieht den folgenden Button mit der Maus in eure Lesezeichenleiste:
+      <br>
+      <a id="bookmarklet-link" class="bookmarklet-link">Spektrum&nbsp;Quellenangabe</a>
+    </li>
+    <li class="hint">
+      Alternativ: Rechtsklick auf den Button → „Link zu Lesezeichen hinzufügen“
+      (oder entsprechende Option) wählen.
+    </li>
+  </ol>
+
+  <h2>Falls das Ziehen nicht funktioniert</h2>
+  <p class="hint">
+    Kopiert den folgenden Code komplett und fügt ihn als URL eines neuen
+    Lesezeichens ein:
+  </p>
+  <textarea id="bookmarklet-code" readonly>
+javascript:(async()=>{const g=s=>(document.querySelector(s)||{}).content||'',u=a=>[...new Set(a.filter(Boolean))],y=h=>/^\d{4}$/.test(h)&&+h>=1900&&+h<=new Date().getFullYear()+1,c=s=>s.replace(/\p{L}+/gu,w=>w[0].toUpperCase()+w.slice(1).toLowerCase());let A=[...[...document.querySelectorAll('meta[name="citation_author"]')].map(e=>e.content),...g('meta[name="citation_authors"]').split(/;|,/),...g('meta[name="DC.creator"],meta[name="dcterms.creator"]').split(/;|,/)],D=g('meta[name="citation_doi"]')||g('meta[name="dc.identifier"]')||(document.body.textContent.match(/10\.\d{4,9}\/[-._;()/:A-Z0-9]+/i)||[])[0]||'';document.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{try{const d=JSON.parse(s.textContent);(Array.isArray(d)?d:[d]).filter(o=>/Article/i.test(o["@type"])).forEach(o=>{const f=v=>Array.isArray(v)?v.forEach(f):typeof v=="string"?A.push(v):v?.name&&A.push(v.name);f(o.author)})}catch{}});if(!A.some(a=>a.trim())&&D)try{const r=await fetch("https://api.crossref.org/works/"+encodeURIComponent(D));if(r.ok){const j=await r.json();(j.message?.author||[]).forEach(a=>A.push(`${a.family||''}, ${a.given?.[0]||''}`))}}catch{}A=u(A.map(a=>a.trim()));const F=t=>{t=t.trim().replace(/\s+/g,' ');if(!t)return'';if(/,/.test(t)){const[l,r]=t.split(',');return`${c(l.trim())}, ${c(r.trim())[0]}.`;}const p=t.split(' '),last=p[p.length-1];if(/^[A-Z]{1,2}$/.test(last)){p.pop();return`${c(p.join(' '))}, ${last[0]}.`;}const init=c(p[0]||'')[0]||'';return`${c(last)}, ${init}.`;};let a='';A.length===1?a=F(A[0]):A.length===2?a=`${F(A[0])}, ${F(A[1])}`:A.length>2&&(a=`${F(A[0])} et al.`);let j=g('meta[name="citation_journal_title"]')||g('meta[name="prism.publicationName"]')||g('meta[name="DC.relation.ispartof"]');document.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{try{const d=JSON.parse(s.textContent);(Array.isArray(d)?d:[d]).forEach(o=>!j&&o.isPartOf?.name&&(j=o.isPartOf.name))}catch{}});if(!j&&D)try{const r=await fetch("https://api.crossref.org/works/"+encodeURIComponent(D));if(r.ok){const k=await r.json();j=k.message?.["container-title"]?.[0]||''}}catch{}if(!j&&(location.hostname.includes('arxiv.org')||/arxiv/i.test(D)))j='arXiv';const ds=[g('meta[name="citation_publication_date"]'),g('meta[name="citation_date"]'),g('meta[name="dc.date"],meta[name="dcterms.issued"]')];document.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{try{const d=JSON.parse(s.textContent);(Array.isArray(d)?d:[d]).forEach(o=>o.datePublished&&ds.push(o.datePublished))}catch{}});let Y=ds.map(d=>(d.match(/\d{4}/)||[])[0]).find(y)||((D.match(/\.(\d{4})(?:\.|$)/)||[])[1]||'');const cite=[a,a&&(j||D)?',':'',j,!j&&D&&a?',':'',D,(j||D)&&Y?',':'',Y].filter(Boolean).join(' ').replace(/\s+,/g,',');try{const w=window.open('','','width=520,height=200');w.document.write(`<pre style="white-space:pre-wrap;font:14px monospace;margin:0;padding:8px;">${cite}</pre><button style="margin:8px;font:14px sans-serif;" onclick="(async()=>{try{await navigator.clipboard.writeText(document.querySelector('pre').innerText);}catch(e){const t=document.createElement('textarea');t.value=document.querySelector('pre').innerText;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);}window.close();})();">Kopieren&nbsp;und&nbsp;schlie%C3%9Fen</button>`);w.document.title='Quellenangabe';}catch{alert(cite)}})();
+  </textarea>
+  <button class="copy-btn" type="button" onclick="
+    (async () => {
+      const ta = document.getElementById('bookmarklet-code');
+      ta.select();
+      try {
+        await navigator.clipboard.writeText(ta.value);
+      } catch(e) {
+        document.execCommand('copy');
+      }
+      window.getSelection().removeAllRanges();
+      this.textContent = 'Code kopiert';
+      setTimeout(() => { this.textContent = 'Code kopieren'; }, 1500);
+    })();
+  ">Code kopieren</button>
+
+  <div class="footer">
+    Tipp: Testet das Bookmarklet auf einer Artikelseite (z.&nbsp;B. Verlag, Journal, arXiv).
+    Es öffnet ein kleines Fenster mit der erkannten Quellenangabe, die ihr dann direkt einfügen könnt.
+  </div>
+
+  <script>
+    // Setzt den Link aus dem Textarea-Inhalt,
+    // damit das Bookmarklet im HTML selbst nicht verstümmelt werden muss.
+    (function () {
+      const ta = document.getElementById('bookmarklet-code');
+      const link = document.getElementById('bookmarklet-link');
+      if (ta && link) {
+        const code = ta.value.trim();
+        link.href = code;
+      }
+    })();
+  </script>
+</body>
+</html>
